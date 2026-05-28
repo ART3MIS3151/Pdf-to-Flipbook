@@ -1,0 +1,130 @@
+.app-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+  flex-shrink: 0;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Uploader Styles */
+.uploader-container {
+  width: 100%;
+  max-width: 600px;
+  padding: 3rem 2rem;
+  text-align: center;
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.uploader-container.drag-active {
+  border-color: var(--accent-color);
+  background: rgba(59, 130, 246, 0.1);
+  transform: scale(1.02);
+}
+
+.upload-icon {
+  width: 64px;
+  height: 64px;
+  color: var(--accent-color);
+  margin-bottom: 1rem;
+}
+
+.hidden-input {
+  display: none;
+}
+
+/* Loader Styles */
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-left-color: var(--accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.progress-bar-container {
+  width: 200px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-color), #8b5cf6);
+  transition: width 0.3s ease;
+}
+
+/* Flipbook Styles */
+.flipbook-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.flipbook-controls {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* StPageFlip specific styles */
+.page {
+  background-color: #fff;
+  color: #333;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.page img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Ensure the whole PDF page fits */
+}
+
+/* To give a realistic 3D shadow on the middle fold */
+.page.-left {
+  box-shadow: inset -10px 0 20px -10px rgba(0, 0, 0, 0.3);
+}
+
+.page.-right {
+  box-shadow: inset 10px 0 20px -10px rgba(0, 0, 0, 0.3);
+}
