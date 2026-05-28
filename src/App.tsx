@@ -4,6 +4,7 @@ import { PDFUploader } from './PDFUploader';
 import { Flipbook } from './Flipbook';
 import { loadPDFPages } from './PDFLoader';
 import type { PDFLoadProgress } from './PDFLoader';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 function App() {
   const [pages, setPages] = useState<string[]>([]);
@@ -41,6 +42,7 @@ function App() {
   };
 
   return (
+    <>
     <div className="app-container">
       <header className="header">
         <h1>Aria Flipbook</h1>
@@ -85,6 +87,8 @@ function App() {
         )}
       </main>
     </div>
+    <SpeedInsights />
+    </>
   );
 }
 
