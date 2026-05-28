@@ -1,73 +1,49 @@
-# React + TypeScript + Vite
+# Custom PDF Flipbook Web App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A premium, interactive web application that allows users to upload PDF documents and read them with a realistic 3D page-flipping animation. Built with React, Vite, and PDF.js.
 
-Currently, two official plugins are available:
+## Features
+- **Realistic 3D Page Curling**: Authentic physical page turning physics powered by `react-pageflip`.
+- **Authentic Sound Design**: Accurate page flip audio synced to the user's manual dragging or clicking actions.
+- **Client-Side PDF Rendering**: Fast and secure local rendering using `pdf.js`. No files are uploaded to any server.
+- **Glassmorphism UI**: Beautiful, modern dark-mode aesthetic with frosted glass elements.
+- **Responsive Layout**: Adjusts automatically to your screen size while maintaining the document's aspect ratio.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Requirements
+- [Node.js](https://nodejs.org/) (version 16 or higher recommended)
+- npm or yarn
 
-## React Compiler
+## Installation
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/ART3MIS3151/Pdf-to-Flipbook.git
+   cd Pdf-to-Flipbook
+   ```
 
-## Expanding the ESLint configuration
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Running Locally
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+To start the local development server:
+```bash
+npm run dev
 ```
+Once running, open the URL provided in your terminal (usually `http://localhost:5173`) in your web browser.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Building for Production
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+To create an optimized production build:
+```bash
+npm run build
 ```
+This will compile the application into the `dist/` directory, which can then be deployed to any static hosting service (like Vercel, Netlify, or GitHub Pages).
+
+## Usage
+1. Open the application in your browser.
+2. Drag and drop any `.pdf` file into the upload area, or click to browse your files.
+3. Wait a moment for the PDF to be processed and rendered into the canvas.
+4. Drag the corners of the pages or click on the edges to flip through the book! You can toggle the page flip sound on or off using the volume icon at the top.
