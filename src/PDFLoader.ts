@@ -1,7 +1,8 @@
 import * as pdfjsLib from 'pdfjs-dist';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
-// Configure the worker. Using the locally installed pdf.js worker.
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+// Configure the worker using Vite's URL import
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 export interface PDFLoadProgress {
   currentPage: number;

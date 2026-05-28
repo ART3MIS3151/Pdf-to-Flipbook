@@ -1,90 +1,43 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { PageFlip } from 'page-flip';
+import React, { useEffect, useRef, useState, forwardRef } from 'react';
+// @ts-ignore
+import HTMLFlipBook from 'react-pageflip';
 import { Volume2, VolumeX } from 'lucide-react';
 
 interface FlipbookProps {
   pages: string[];
 }
 
-export const Flipbook: React.FC<FlipbookProps> = ({ pages }) => {
-  const bookRef = useRef<HTMLDivElement>(null);
-  const pageFlipRef = useRef<PageFlip | null>(null);
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const audioCtxRef = useRef<AudioContext | null>(null);
+// React-pageflip requires custom components to use forwardRef
+const Page = forwardRef<HTMLDivElement, { imgSrc: string, index: number }>((props, ref) => {
+  return (
+    <div className="page" ref={ref} style={{ backgroundColor: 'white' }}>
+      <img 
+        src={props.imgSrc} 
+        alt={`Page ${props.index + 1}`} 
+        draggable="false" 
+        style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} 
+      />
+    </div>
+  );
+});
 
-  // Initialize Audio Context
+export const Flipbook: React.FC<FlipbookProps> = ({ pages }) => {
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   useEffect(() => {
-    audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-    return () => {
-      if (audioCtxRef.current?.state !== 'closed') {
-        audioCtxRef.current?.close();
-      }
-    };
+    audioRef.current = new Audio('/page-flip.mp3');
   }, []);
 
   const playFlipSound = () => {
-    if (!soundEnabled || !audioCtxRef.current) return;
+    if (!soundEnabled || !audioRef.current) return;
     
-    const audioCtx = audioCtxRef.current;
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    
-    // Synthesize a paper rustle/flip sound
-    const bufferSize = audioCtx.sampleRate * 0.15; // 150ms
-    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = Math.random() * 2 - 1;
-    }
-    
-    const noise = audioCtx.createBufferSource();
-    noise.buffer = buffer;
-    
-    const filter = audioCtx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.value = 800; // Low frequency for paper thickness
-    
-    const envelope = audioCtx.createGain();
-    envelope.gain.setValueAtTime(0.8, audioCtx.currentTime);
-    envelope.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-    
-    noise.connect(filter);
-    filter.connect(envelope);
-    envelope.connect(audioCtx.destination);
-    noise.start();
+    // Reset time to allow rapid flipping
+    audioRef.current.currentTime = 0;
+    audioRef.current.play().catch(e => console.log('Audio play failed:', e));
   };
 
-  useEffect(() => {
-    if (bookRef.current && pages.length > 0 && !pageFlipRef.current) {
-      // Initialize PageFlip
-      const pageFlip = new PageFlip(bookRef.current, {
-        width: 450, // base width
-        height: 600, // base height
-        size: 'stretch',
-        minWidth: 315,
-        maxWidth: 1000,
-        minHeight: 420,
-        maxHeight: 1350,
-        maxShadowOpacity: 0.5,
-        showCover: true,
-        mobileScrollSupport: false
-      });
-
-      pageFlip.loadFromHTML(document.querySelectorAll('.page'));
-      pageFlipRef.current = pageFlip;
-
-      // Add event listener for sound
-      pageFlip.on('flip', () => {
-        playFlipSound();
-      });
-    }
-
-    return () => {
-      if (pageFlipRef.current) {
-        pageFlipRef.current.destroy();
-        pageFlipRef.current = null;
-      }
-    };
-  }, [pages]); // Assuming pages don't change after load for now
+  const prevState = useRef<string>('read');
 
   return (
     <div className="flipbook-container">
@@ -102,14 +55,34 @@ export const Flipbook: React.FC<FlipbookProps> = ({ pages }) => {
         </span>
       </div>
       
-      <div className="book-wrapper" style={{ width: '90vw', height: '80vh', maxWidth: '1000px', maxHeight: '700px' }}>
-        <div ref={bookRef} id="book">
+      <div className="book-wrapper" style={{ flex: 1, width: '100%', maxWidth: '1200px', position: 'relative', minHeight: 0, paddingBottom: '1rem' }}>
+        {/* @ts-ignore - react-pageflip typings are strict about optional props */}
+        <HTMLFlipBook 
+          width={450} 
+          height={636} 
+          size="stretch"
+          minWidth={315}
+          maxWidth={1000}
+          minHeight={420}
+          maxHeight={1350}
+          maxShadowOpacity={0.5}
+          showCover={true}
+          mobileScrollSupport={false}
+          onChangeState={(e: any) => {
+            const currentState = e.data;
+            if (currentState === 'user_fold') {
+              playFlipSound();
+            } else if (currentState === 'flipping' && prevState.current !== 'user_fold') {
+              playFlipSound();
+            }
+            prevState.current = currentState;
+          }}
+          className="html-flipbook"
+        >
           {pages.map((imgSrc, index) => (
-            <div className="page" key={index}>
-              <img src={imgSrc} alt={`Page ${index + 1}`} draggable="false" />
-            </div>
+             <Page imgSrc={imgSrc} index={index} key={index} />
           ))}
-        </div>
+        </HTMLFlipBook>
       </div>
     </div>
   );
