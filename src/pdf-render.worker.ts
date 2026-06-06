@@ -32,8 +32,12 @@ self.onmessage = async (e: MessageEvent) => {
   const { data: arrayBuffer } = e;
 
   try {
-    // Load the PDF document
-    const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+    // Load the PDF document with options tailored for Web Workers
+    const loadingTask = pdfjsLib.getDocument({ 
+      data: arrayBuffer,
+      disableFontFace: true, // Forces text to be drawn as vector paths since Web Workers can't reliably load fonts
+      standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/standard_fonts/`, // Provide standard fonts for non-embedded text
+    });
     const pdf = await loadingTask.promise;
     const numPages = pdf.numPages;
 
