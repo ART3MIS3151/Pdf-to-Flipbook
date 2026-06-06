@@ -1,9 +1,3 @@
-import * as pdfjsLib from 'pdfjs-dist';
-import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-
-// Configure the worker using Vite's URL import
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
-
 export interface PDFLoadProgress {
   currentPage: number;
   totalPages: number;
@@ -15,48 +9,34 @@ export const loadPDFPages = async (
 ): Promise<string[]> => {
   const arrayBuffer = await file.arrayBuffer();
   
-  // Load the PDF document
-  const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
-  const pdf = await loadingTask.promise;
-  const numPages = pdf.numPages;
-  
-  const pages: string[] = [];
-  
-  // Render each page
-  for (let i = 1; i <= numPages; i++) {
-    const page = await pdf.getPage(i);
+  return new Promise((resolve, reject) => {
+    // Instantiate the Web Worker using Vite's special syntax
+    const worker = new Worker(new URL('./pdf-render.worker.ts', import.meta.url), { type: 'module' });
     
-    // Set scale for reasonable quality vs performance
-    const viewport = page.getViewport({ scale: 1.5 });
-    
-    // Prepare canvas using PDF page dimensions
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-    
-    if (!context) {
-      throw new Error("Could not get canvas context");
-    }
-    
-    canvas.height = viewport.height;
-    canvas.width = viewport.width;
-    
-    // Render PDF page into canvas context
-    const renderContext = {
-      canvasContext: context,
-      viewport: viewport,
+    worker.onmessage = (e) => {
+      const { type, ...data } = e.data;
+      
+      if (type === 'progress') {
+        if (onProgress) {
+          onProgress({ currentPage: data.currentPage, totalPages: data.totalPages });
+        }
+      } else if (type === 'complete') {
+        // Convert Blobs to ultra-fast Object URLs for image tags
+        const pages = data.pages.map((blob: Blob) => URL.createObjectURL(blob));
+        worker.terminate();
+        resolve(pages);
+      } else if (type === 'error') {
+        worker.terminate();
+        reject(new Error(data.error));
+      }
     };
     
-    // @ts-ignore - type definitions might have a mismatch but this is valid
-    await page.render(renderContext).promise;
+    worker.onerror = (err) => {
+      worker.terminate();
+      reject(err);
+    };
     
-    // Convert to image data URL
-    const imgData = canvas.toDataURL('image/jpeg', 0.8);
-    pages.push(imgData);
-    
-    if (onProgress) {
-      onProgress({ currentPage: i, totalPages: numPages });
-    }
-  }
-  
-  return pages;
+    // Transfer the ArrayBuffer directly to the worker for zero-copy speed
+    worker.postMessage(arrayBuffer, [arrayBuffer]);
+  });
 };
