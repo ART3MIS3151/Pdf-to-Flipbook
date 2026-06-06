@@ -4,6 +4,29 @@ import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 // Configure the worker using Vite's URL import
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
+// Minimal DOM polyfill for pdf.js to prevent 'document.createElement' errors during background rendering
+if (typeof (globalThis as any).document === 'undefined') {
+  (globalThis as any).document = {
+    createElement: (name: string) => {
+      if (name.toLowerCase() === 'canvas') {
+        return new OffscreenCanvas(1, 1);
+      }
+      return { style: {} };
+    },
+    documentElement: { style: {} },
+    getElementsByTagName: () => [],
+    currentScript: null
+  };
+}
+
+if (typeof (globalThis as any).window === 'undefined') {
+  (globalThis as any).window = globalThis;
+}
+
+if (!globalThis.requestAnimationFrame) {
+  (globalThis as any).requestAnimationFrame = (cb: Function) => setTimeout(cb, 16);
+}
+
 self.onmessage = async (e: MessageEvent) => {
   const { data: arrayBuffer } = e;
 
