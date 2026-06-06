@@ -4,7 +4,7 @@ import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 // Configure the worker using Vite's URL import
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
-// Minimal DOM polyfill for pdf.js to prevent 'document.createElement' errors during background rendering
+// Minimal DOM polyfill for pdf.js to prevent 'document.createElement' and rAF errors during background rendering
 if (typeof (globalThis as any).document === 'undefined') {
   (globalThis as any).document = {
     createElement: (name: string) => {
@@ -23,8 +23,9 @@ if (typeof (globalThis as any).window === 'undefined') {
   (globalThis as any).window = globalThis;
 }
 
-if (!globalThis.requestAnimationFrame) {
+if (typeof (globalThis as any).requestAnimationFrame === 'undefined') {
   (globalThis as any).requestAnimationFrame = (cb: Function) => setTimeout(cb, 16);
+  (globalThis as any).cancelAnimationFrame = (id: any) => clearTimeout(id);
 }
 
 self.onmessage = async (e: MessageEvent) => {

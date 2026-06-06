@@ -28,9 +28,9 @@ function App() {
       }
       
       setPages(renderedPages);
-    } catch (err: any) {
-      console.error(err);
-      setError(err.message || "Failed to load PDF. Please try a different file.");
+    } catch (error: any) {
+      console.error("Error loading PDF:", error);
+      setError(`Failed to load PDF: ${error.message || String(error)}`);
     } finally {
       setLoading(false);
       setProgress(null);
