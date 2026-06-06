@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, forwardRef } from 'react';
 // @ts-ignore
 import HTMLFlipBook from 'react-pageflip';
-import { Volume2, VolumeX } from 'lucide-react';
+import { Volume2, VolumeX, ChevronLeft, ChevronRight, MousePointer2, Hand } from 'lucide-react';
 
 interface FlipbookProps {
   pages: string[];
@@ -23,7 +23,12 @@ const Page = forwardRef<HTMLDivElement, { imgSrc: string, index: number }>((prop
 
 export const Flipbook: React.FC<FlipbookProps> = ({ pages }) => {
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [interactionMode, setInteractionMode] = useState<'swipe' | 'pan'>('swipe');
+  
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const flipbookRef = useRef<any>(null);
+  const prevState = useRef<string>('read');
 
   useEffect(() => {
     audioRef.current = new Audio('/page-flip.mp3');
@@ -37,27 +42,83 @@ export const Flipbook: React.FC<FlipbookProps> = ({ pages }) => {
     audioRef.current.play().catch(e => console.log('Audio play failed:', e));
   };
 
-  const prevState = useRef<string>('read');
+  const handlePageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const pageIndex = parseInt(e.target.value, 10);
+    if (flipbookRef.current) {
+      flipbookRef.current.pageFlip().turnToPage(pageIndex);
+    }
+  };
+
+  const goToPrevPage = () => {
+    if (flipbookRef.current) {
+      flipbookRef.current.pageFlip().flipPrev();
+    }
+  };
+
+  const goToNextPage = () => {
+    if (flipbookRef.current) {
+      flipbookRef.current.pageFlip().flipNext();
+    }
+  };
 
   return (
     <div className="flipbook-container">
-      <div className="flipbook-controls glass-panel" style={{ padding: '0.5rem 1rem', borderRadius: '20px' }}>
-        <button 
-          className="btn-secondary" 
-          style={{ padding: '8px', border: 'none', background: 'transparent' }}
-          onClick={() => setSoundEnabled(!soundEnabled)}
-          title="Toggle Sound"
-        >
-          {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
-        </button>
-        <span style={{ fontSize: '0.9rem', color: '#ccc' }}>
-          Drag corners to flip pages
-        </span>
+      <div className="flipbook-controls glass-panel" style={{ padding: '1rem', borderRadius: '20px', display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1rem', width: '100%', maxWidth: '800px' }}>
+        
+        {/* Top Row: Modes & Audio */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+          <button 
+            className="btn-secondary" 
+            style={{ padding: '8px 12px', border: 'none', background: 'rgba(255,255,255,0.1)', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', color: 'white' }}
+            onClick={() => setInteractionMode(prev => prev === 'swipe' ? 'pan' : 'swipe')}
+            title={interactionMode === 'swipe' ? "Switch to Pan & Zoom Mode" : "Switch to Swipe Mode"}
+          >
+            {interactionMode === 'swipe' ? (
+              <><MousePointer2 size={16} /> <span style={{fontSize: '0.85rem'}}>Swipe Mode</span></>
+            ) : (
+              <><Hand size={16} /> <span style={{fontSize: '0.85rem'}}>Pan Mode</span></>
+            )}
+          </button>
+
+          <span style={{ fontSize: '1rem', color: '#fff', fontWeight: 'bold' }}>
+            Page {currentPage + 1} of {pages.length}
+          </span>
+
+          <button 
+            className="btn-secondary" 
+            style={{ padding: '8px', border: 'none', background: 'transparent', cursor: 'pointer', color: 'white' }}
+            onClick={() => setSoundEnabled(!soundEnabled)}
+            title="Toggle Sound"
+          >
+            {soundEnabled ? <Volume2 size={24} /> : <VolumeX size={24} />}
+          </button>
+        </div>
+
+        {/* Bottom Row: Scrubber */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%' }}>
+          <button onClick={goToPrevPage} disabled={currentPage === 0} style={{ background: 'transparent', border: 'none', color: currentPage === 0 ? '#555' : '#fff', cursor: currentPage === 0 ? 'default' : 'pointer' }}>
+            <ChevronLeft size={28} />
+          </button>
+          
+          <input 
+            type="range" 
+            min={0} 
+            max={pages.length - 1} 
+            value={currentPage} 
+            onChange={handlePageChange}
+            style={{ flex: 1, cursor: 'pointer', height: '6px', borderRadius: '4px', accentColor: '#8a2be2' }}
+          />
+
+          <button onClick={goToNextPage} disabled={currentPage >= pages.length - 1} style={{ background: 'transparent', border: 'none', color: currentPage >= pages.length - 1 ? '#555' : '#fff', cursor: currentPage >= pages.length - 1 ? 'default' : 'pointer' }}>
+            <ChevronRight size={28} />
+          </button>
+        </div>
       </div>
       
       <div className="book-wrapper" style={{ flex: 1, width: '100%', maxWidth: '1200px', position: 'relative', minHeight: 0, paddingBottom: '1rem' }}>
         {/* @ts-ignore - react-pageflip typings are strict about optional props */}
         <HTMLFlipBook 
+          ref={flipbookRef}
           width={450} 
           height={636} 
           size="stretch"
@@ -68,6 +129,9 @@ export const Flipbook: React.FC<FlipbookProps> = ({ pages }) => {
           maxShadowOpacity={0.5}
           showCover={true}
           mobileScrollSupport={false}
+          swipeDistance={40}
+          useMouseEvents={interactionMode === 'swipe'}
+          onFlip={(e: any) => setCurrentPage(e.data)}
           onChangeState={(e: any) => {
             const currentState = e.data;
             if (currentState === 'user_fold') {
