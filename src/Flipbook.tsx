@@ -147,6 +147,22 @@ export const Flipbook: React.FC<FlipbookProps> = ({ pages }) => {
              <Page imgSrc={imgSrc} index={index} key={index} />
           ))}
         </HTMLFlipBook>
+
+        {/* 
+          When in 'pan' mode, this invisible overlay sits on top of the flipbook.
+          It intercepts all touch events, preventing react-pageflip from hijacking them.
+          This allows the browser to perform native pinch-to-zoom and panning seamlessly.
+        */}
+        {interactionMode === 'pan' && (
+          <div 
+            style={{ 
+              position: 'absolute', 
+              top: 0, left: 0, right: 0, bottom: 0, 
+              zIndex: 10, 
+              touchAction: 'pan-x pan-y pinch-zoom' 
+            }} 
+          />
+        )}
       </div>
     </div>
   );
