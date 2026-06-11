@@ -1,0 +1,12 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Flipbook metadata — anyone can read (for shared links), anyone can create
+    match /flipbooks/{flipbookId} {
+      allow read;
+      allow create;
+      allow update, delete: if false;
+    }
+  }
+}

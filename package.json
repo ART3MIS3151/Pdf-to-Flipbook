@@ -12,12 +12,14 @@
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
+    "firebase": "^12.14.0",
     "lucide-react": "^1.17.0",
     "page-flip": "^2.0.7",
     "pdfjs-dist": "^5.7.284",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "react-pageflip": "^2.0.3"
+    "react-pageflip": "^2.0.3",
+    "react-router-dom": "^7.17.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
