@@ -1,5 +1,6 @@
 {
   "firestore": {
+    "database": "flipbook-db",
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   }

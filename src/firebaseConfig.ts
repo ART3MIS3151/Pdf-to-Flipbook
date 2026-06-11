@@ -20,7 +20,7 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize services
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const db = getFirestore(app, "flipbook-db");
 export const storage = getStorage(app);
 
 export default app;
